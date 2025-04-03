@@ -1,6 +1,17 @@
 ## NVIDIA Isaac GR00T N1
 
-Adapted for lower performance GPU training: [groot_finetune.py modifications](https://github.com/NVIDIA/Isaac-GR00T/issues/24#issuecomment-2757807812)
+Adapted for lower performance GPU fine-tuning: [groot_finetune.py modifications](https://github.com/NVIDIA/Isaac-GR00T/issues/24#issuecomment-2757807812)
+
+## Installation
+```sh
+conda create -n gr00t python=3.10
+conda activate gr00t
+pip install --upgrade setuptools
+pip install -e .
+pip install --no-build-isolation flash-attn==2.7.1.post4 
+```
+
+
 
 ## License 
 

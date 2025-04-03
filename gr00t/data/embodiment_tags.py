@@ -18,10 +18,7 @@ from enum import Enum
 
 class EmbodimentTag(Enum):
     GR1 = "gr1"
-    """
-    The GR1 dataset.
-    """
-    OPENARM = "openarm"
+    NEW_EMBODIMENT = "new_embodiment"
     """
     Any new embodiment for finetuning.
     """

@@ -46,7 +46,7 @@ class Config:
     """Data configuration name from DATA_CONFIG_MAP."""
 
     # Training parameters
-    batch_size: int = 16
+    batch_size: int = 8
     """Batch size per GPU for training."""
 
     max_steps: int = 10000
@@ -96,7 +96,7 @@ class Config:
     lora_dropout: float = 0.1
     """Dropout rate for the LORA model."""
 
-    dataloader_num_workers: int = 8
+    dataloader_num_workers: int = 2
     """Number of workers for data loading."""
 
     report_to: str = "wandb"
@@ -161,15 +161,15 @@ def main(config: Config):
         run_name=None,
         remove_unused_columns=False,
         deepspeed="",
-        gradient_checkpointing=False,
+        gradient_checkpointing=True, # changed to true
         bf16=True,
         tf32=True,
         per_device_train_batch_size=config.batch_size,
-        gradient_accumulation_steps=1,
+        gradient_accumulation_steps=4,
         dataloader_num_workers=config.dataloader_num_workers,
-        dataloader_pin_memory=False,
+        dataloader_pin_memory=True,
         dataloader_persistent_workers=True,
-        optim="adamw_torch",
+        optim="adamw_torch_fused",
         adam_beta1=0.95,
         adam_beta2=0.999,
         adam_epsilon=1e-8,
@@ -183,12 +183,12 @@ def main(config: Config):
         save_strategy="steps",
         save_steps=config.save_steps,
         evaluation_strategy="no",
-        save_total_limit=8,
+        save_total_limit=3,
         report_to=config.report_to,
         seed=42,
         do_eval=False,
         ddp_find_unused_parameters=False,
-        ddp_bucket_cap_mb=100,
+        ddp_bucket_cap_mb=50,
         torch_compile_mode=None,
     )
 

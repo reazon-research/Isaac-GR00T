@@ -21,8 +21,7 @@ class EmbodimentTag(Enum):
     """
     The GR1 dataset.
     """
-
-    NEW_EMBODIMENT = "new_embodiment"
+    OPENARM = "openarm"
     """
     Any new embodiment for finetuning.
     """

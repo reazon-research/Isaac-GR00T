@@ -1,6 +1,6 @@
 ## NVIDIA Isaac GR00T N1
 
-Adapted for lower performance GPU fine-tuning: [groot_finetune.py modifications](https://github.com/NVIDIA/Isaac-GR00T/issues/24#issuecomment-2757807812)
+Adapted for lower performance GPU fine-tuning (3090 TI)
 
 ## Installation
 ```sh
@@ -10,6 +10,10 @@ pip install --upgrade setuptools
 pip install -e .
 pip install --no-build-isolation flash-attn==2.7.1.post4 
 ```
+
+## Known Issues
+
+- Fine-tuning image inputs requires significant VRAM (more than 24GB): [reduce parallel processes in groot_finetune.py](https://github.com/NVIDIA/Isaac-GR00T/issues/24#issuecomment-2757807812)
 
 
 

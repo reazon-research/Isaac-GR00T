@@ -19,6 +19,7 @@ from enum import Enum
 class EmbodimentTag(Enum):
     GR1 = "gr1"
     NEW_EMBODIMENT = "new_embodiment"
+    OPENARM= "openarm"
     """
     Any new embodiment for finetuning.
     """

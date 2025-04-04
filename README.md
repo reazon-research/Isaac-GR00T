@@ -1,6 +1,9 @@
 ## NVIDIA Isaac GR00T N1
 
-Adapted for lower performance GPU fine-tuning (3090 TI)
+For deployment on [OpenArm](https://github.com/reazon-research/openarm)
+
+![openarm-1-5k-steps.png](./media/openarm-1-5k-steps.png)
+
 
 ## Installation
 ```sh

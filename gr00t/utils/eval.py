@@ -116,7 +116,7 @@ def calc_mse_for_single_trajectory(
             ax.set_title(f"Joint {i}")
             ax.legend()
 
-        plt.tight_layout()
+        plt.tight_layout(rect=(0.0, 0.0, 1.0, 0.95))  # Adjust layout to make room for the title
         plt.savefig(f"traj_{traj_id}_modality_{'_'.join(modality_keys)}.png")
         plt.show()
 

@@ -189,7 +189,7 @@ if __name__ == "__main__":
     parser.add_argument("--host", type=str, default="10.110.17.183")
     parser.add_argument("--port", type=int, default=8888)
     parser.add_argument("--action_horizon", type=int, default=12)
-    parser.add_argument("--actions_to_execute", type=int, default=350)
+    parser.add_argument("--actions_to_execute", type=int, default=1500)
     parser.add_argument("--camera_index", type=int, default=0)
     args = parser.parse_args()
 
@@ -204,7 +204,7 @@ if __name__ == "__main__":
         client = Gr00tRobotInferenceClient(
             host=args.host,
             port=args.port,
-            language_instruction="Pick up the fruits and place them on the plate.",
+            language_instruction="pick up the bottle from the counter and place it inside the bin.",
         )
 
         robot = OpenArmRobot(calibrate=False, enable_camera=True, camera_index=args.camera_index)

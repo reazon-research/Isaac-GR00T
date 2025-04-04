@@ -14,3 +14,9 @@ raw_obs_dict: Dict[str, Any] = {
 policy = ExternalRobotInferenceClient(host="localhost", port=8888)
 raw_action_chunk: Dict[str, Any] = policy.get_action(raw_obs_dict)
 print("Raw action chunk:", raw_action_chunk)
+for key, value in raw_action_chunk.items():
+    print(f"Action: {key}: {value.shape}")
+MODALITY_KEYS = ["single_arm", "gripper"]
+
+concat_action = np.concatenate([np.atleast_1d(raw_action_chunk[f"action.{key}"][0]) for key in MODALITY_KEYS],axis=0,)
+assert concat_action.shape == (8,), concat_action.shape

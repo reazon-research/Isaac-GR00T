@@ -1,0 +1,118 @@
+{
+    "codebase_version": "v2.0",
+    "robot_type": "OpenArm",
+    "total_episodes": 58,
+    "total_frames": 75559,
+    "total_tasks": 58,
+    "total_videos": 1,
+    "total_chunks": 0,
+    "chunks_size": 1000,
+    "fps": 30.0,
+    "splits": {
+        "train": "0:100"
+    },
+    "data_path": "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet",
+    "video_path": "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4",
+    "features": {
+        "observation.images.ego_view": {
+            "dtype": "video",
+            "shape": [
+                480,
+                640,
+                3
+            ],
+            "names": [
+                "height",
+                "width",
+                "channel"
+            ],
+            "video_info": {
+                "video.fps": 30.0,
+                "video.codec": "h264",
+                "video.pix_fmt": "yuv420p",
+                "video.is_depth_map": false,
+                "has_audio": false
+            }
+        },
+        "observation.state": {
+            "dtype": "float64",
+            "shape": [
+                8
+            ],
+            "names": [
+                "rev1",
+                "rev2",
+                "rev3",
+                "rev4",
+                "rev5",
+                "rev6",
+                "rev7",
+                "gripper"
+            ]
+        },
+        "action": {
+            "dtype": "float64",
+            "shape": [
+                8
+            ],
+            "names": [
+                "rev1",
+                "rev2",
+                "rev3",
+                "rev4",
+                "rev5",
+                "rev6",
+                "rev7",
+                "gripper"
+            ]
+        },
+        "timestamp": {
+            "dtype": "float64",
+            "shape": [
+                1
+            ]
+        },
+        "annotation.human.action.task_description": {
+            "dtype": "int64",
+            "shape": [
+                1
+            ]
+        },
+        "task_index": {
+            "dtype": "int64",
+            "shape": [
+                1
+            ]
+        },
+        "annotation.human.validity": {
+            "dtype": "int64",
+            "shape": [
+                1
+            ]
+        },
+        "episode_index": {
+            "dtype": "int64",
+            "shape": [
+                1
+            ]
+        },
+        "index": {
+            "dtype": "int64",
+            "shape": [
+                1
+            ]
+        },
+        "next.reward": {
+            "dtype": "float64",
+            "shape": [
+                1
+            ]
+        },
+        "next.done": {
+            "dtype": "bool",
+            "shape": [
+                1
+            ]
+        }
+    }
+}

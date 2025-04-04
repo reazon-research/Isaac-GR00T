@@ -19,3 +19,5 @@ python3 scripts/gr00t_finetune.py --dataset-path ./demo_data/openarm.PickNPlace/
 openarm --video_backend \
 torchvision_av --batch_size 64
 ```
+
+The `annotation.human.action.task_description` property needs to be kept consistent for tasks, e.g. 0

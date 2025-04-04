@@ -1,6 +1,6 @@
 {
     "codebase_version": "v2.0",
-    "robot_type": "OpenArm",
+    "robot_type": "openarm",
     "total_episodes": 58,
     "total_frames": 75559,
     "total_tasks": 58,

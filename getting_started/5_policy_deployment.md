@@ -16,7 +16,7 @@ python scripts/inference_service.py --server \
     --embodiment_tag new_embodiment \
     --data_config openarm \
     --denoising_steps 4 \
-    --
+    --port 8888
 ```
 
  - Model path is the path to the checkpoint to use for the policy, user should provide the path to the checkpoint after finetuning
@@ -49,9 +49,9 @@ We provide a sample client node implementation for the So100 Lerobot arm. Please
 
 User can run the following command to start the client node.
 ```bash
-python examples/eval_gr00t_so100.py \
+python examples/eval_gr00t_openarm.py \
  --use_policy --host <YOUR_POLICY_SERVER_HOST> \
- --port <YOUR_POLICY_SERVER_PORT> \
+ --port 8888 \
  --camera_index <YOUR_CAMERA_INDEX>
 ```
 

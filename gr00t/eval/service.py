@@ -47,7 +47,7 @@ class BaseInferenceServer:
     Can add custom endpoints by calling `register_endpoint`.
     """
 
-    def __init__(self, host: str = "*", port: int = 5555):
+    def __init__(self, host: str = "*", port: int = 8888):
         self.running = True
         self.context = zmq.Context()
         self.socket = self.context.socket(zmq.REP)
@@ -109,7 +109,7 @@ class BaseInferenceServer:
 
 
 class BaseInferenceClient:
-    def __init__(self, host: str = "localhost", port: int = 5555, timeout_ms: int = 15000):
+    def __init__(self, host: str = "localhost", port: int = 8888, timeout_ms: int = 15000):
         self.context = zmq.Context()
         self.host = host
         self.port = port

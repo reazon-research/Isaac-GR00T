@@ -25,7 +25,7 @@ class RobotInferenceServer(BaseInferenceServer):
     Server with three endpoints for real robot policies
     """
 
-    def __init__(self, model, host: str = "*", port: int = 5555):
+    def __init__(self, model, host: str = "*", port: int = 8888):
         super().__init__(host, port)
         self.register_endpoint("get_action", model.get_action)
         self.register_endpoint(

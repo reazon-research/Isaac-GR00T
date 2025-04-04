@@ -29,7 +29,7 @@ warnings.simplefilter("ignore", category=FutureWarning)
 """
 Example command:
 
-python scripts/eval_policy.py --host localhost --port 5555 --plot
+python scripts/eval_policy.py --host localhost --port 8888 --plot
     --modality_keys right_arm right_hand
     --steps 250
     --trajs 1000
@@ -44,7 +44,7 @@ provide --model_path to load up the model checkpoint in this script.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", type=str, default="localhost", help="host")
-    parser.add_argument("--port", type=int, default=5555, help="port")
+    parser.add_argument("--port", type=int, default=8888, help="port")
     parser.add_argument("--plot", action="store_true", help="plot images")
     parser.add_argument("--modality_keys", nargs="+", type=str, default=["right_arm", "right_hand"])
     parser.add_argument(

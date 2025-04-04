@@ -127,7 +127,7 @@ class Gr00tRobotInferenceClient:
     def __init__(
         self,
         host="localhost",
-        port=5555,
+        port=8888,
         language_instruction="pick up the bottle from the counter and place it inside the bin.",
     ):
         self.language_instruction = language_instruction
@@ -187,7 +187,7 @@ if __name__ == "__main__":
     )  # default is to playback the provided dataset
     parser.add_argument("--dataset_path", type=str, default=default_dataset_path)
     parser.add_argument("--host", type=str, default="10.110.17.183")
-    parser.add_argument("--port", type=int, default=5555)
+    parser.add_argument("--port", type=int, default=8888)
     parser.add_argument("--action_horizon", type=int, default=12)
     parser.add_argument("--actions_to_execute", type=int, default=350)
     parser.add_argument("--camera_index", type=int, default=0)

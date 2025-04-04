@@ -12,16 +12,17 @@ Run the following command to start the policy server.
 
 ```bash
 python scripts/inference_service.py --server \
-    --model_path <PATH_TO_YOUR_CHECKPOINT> \
+    --model_path ~/openarm-pnp-checkpoints/checkpoint-1500 \
     --embodiment_tag new_embodiment \
-    --data_config so100 \
-    --denoising_steps 4
+    --data_config openarm \
+    --denoising_steps 4 \
+    --
 ```
 
  - Model path is the path to the checkpoint to use for the policy, user should provide the path to the checkpoint after finetuning
  - Denoising steps is the number of denoising steps to use for the policy, we noticed that having a denoising step of 4 is on par with 16
  - Embodiment tag is the tag of the embodiment to use for the policy, user should use new_embodiment when finetuning on a new robot
- - Data config is the data config to use for the policy. Users should use `so100`. If you want to use a different robot, implement your own `ModalityConfig` and `TransformConfig`
+ - Data config is the data config to use for the policy. Users should use `openarm`. If you want to use a different robot, implement your own `ModalityConfig` and `TransformConfig`
 
 ### 2. Client node
 
@@ -35,7 +36,7 @@ from typing import Dict, Any
 
 raw_obs_dict: Dict[str, Any] = {} # fill in the blanks
 
-policy = ExternalRobotInferenceClient(host="localhost", port=5555)
+policy = ExternalRobotInferenceClient(host="localhost", port=8888)
 raw_action_chunk: Dict[str, Any] = policy.get_action(raw_obs_dict)
 ```
 

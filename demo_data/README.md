@@ -23,15 +23,11 @@ The `annotation.human.action.task_description` property needs to be kept consist
 
 ## Inference
 
-The inference server was set up on a DGX cluster using port forwarding
-```sh
-ssh -L 8888:localhost:888 <address-to-cluster>
-```
+The host computer was run on a 3090TI (24GB VRAM)
 
-On the local host, verify that the port is listening
+The port 8888 was exposed to the local subnet, e.g. 192.168.111.0
 ```sh
-netstat --listening |grep 8888
+sudo ufw allow from <local-network-ip>/24 to any port 8888 proto tcp
 ```
-
 
 

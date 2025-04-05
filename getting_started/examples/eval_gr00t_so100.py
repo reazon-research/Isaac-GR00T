@@ -33,7 +33,7 @@ from lerobot.common.robot_devices.utils import RobotDeviceAlreadyConnectedError
 # User can just move this single python class method gr00t/eval/service.py
 # to their code or do the following line below
 # sys.path.append(os.path.expanduser("~/Isaac-GR00T/gr00t/eval/"))
-from service import ExternalRobotInferenceClient
+from gr00t.eval.service import ExternalRobotInferenceClient
 
 # Import tqdm for progress bar
 from tqdm import tqdm

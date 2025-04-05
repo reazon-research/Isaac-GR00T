@@ -21,19 +21,19 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from lerobot.common.datasets.lerobot_dataset import LeRobotDataset
-from lerobot.common.robot_devices.cameras.configs import OpenCVCameraConfig
-from lerobot.common.robot_devices.motors.dynamixel import TorqueMode
 from gr00t.experiment.data_config import OpenArmDataConfig
-from lerobot.common.robot_devices.utils import RobotDeviceAlreadyConnectedError
-from .openarm_drivers.openarm import OpenArm, POS0
+from drivers.openarm import OpenArm, POS0
+from drivers.camera import CameraArray
+from gr00t.data.dataset import LeRobotSingleDataset
+from gr00t.experiment.data_config import DATA_CONFIG_MAP
+from gr00t.data.embodiment_tags import EmbodimentTag
 
 # NOTE:
 # Sometimes we would like to abstract different env, or run this on a separate machine
 # User can just move this single python class method gr00t/eval/service.py
 # to their code or do the following line below
 # sys.path.append(os.path.expanduser("~/Isaac-GR00T/gr00t/eval/"))
-from service import ExternalRobotInferenceClient
+from gr00t.eval.service import ExternalRobotInferenceClient
 
 # Import tqdm for progress bar
 from tqdm import tqdm
@@ -44,22 +44,16 @@ class RobotError(Exception):
     pass
 
 class OpenArmRobot:
-    def __init__(self, calibrate=False, enable_camera=True, camera_index=0, device="can0"):
-        self.calibrate = calibrate
+    def __init__(self, enable_camera=True, camera_index=0, device="can0"):
         self.enable_camera = enable_camera
         self.camera_index = camera_index
         if not enable_camera:
-            self.config.cameras = {}
+            self.cameras = {}
         else:
-            self.config.cameras = {"webcam": OpenCVCameraConfig(camera_index, 30, 640, 480, "bgr")}
-        self.config.leader_arms = {}
+            self.cameras = {"ego_view": CameraArray()}
 
-        if self.calibrate:
-            raise NotImplementedError("calibration not implemented")
-        else:
-            print("skipping calibration")
         # Create the robot
-        self.device = device
+        print(f"starting OpenArm on {device}")
         self.robot = OpenArm(device) # todo
 
     @contextmanager
@@ -72,13 +66,14 @@ class OpenArmRobot:
             self.disconnect()
 
     def connect(self):
-        if not self.robot.enable_torque():
+        if self.robot.enable_torque():
+            print("robot torque enabled")
+        else:
             raise RobotError("Failed to enable torque") 
 
         print("robot present position:", self.motor_bus.read("Present_Position"))
-        self.robot.is_connected = True
 
-        self.camera = self.robot.cameras["webcam"] if self.enable_camera else None
+        self.camera = self.cameras["ego_view"] if self.enable_camera else None
         if self.camera is not None:
             self.camera.connect()
         print("================> OpenArm is fully connected =================")
@@ -93,19 +88,19 @@ class OpenArmRobot:
         self.move_to_initial_pose()
 
     def get_observation(self):
-        return self.robot.capture_observation()
+        return self.robot.capture_observation() and self.camera.capture_observation()
 
     def get_current_state(self):
         return self.get_observation()["observation.state"].data.numpy()
 
     def get_current_img(self):
-        img = self.get_observation()["observation.images.webcam"].data.numpy()
+        img = self.get_observation()["observation.images.ego_view"].data.numpy()
         # convert bgr to rgb
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return img
 
     def set_target_state(self, target_state: torch.Tensor):
-        self.robot.send_action(target_state)
+        self.robot.set_position(target_state)
 
     def disable(self):
         self.robot.disable_torque()
@@ -113,7 +108,6 @@ class OpenArmRobot:
     def disconnect(self):
         self.disable()
         self.robot.disconnect()
-        self.robot.is_connected = False
         print("================> OpenArm disconnected")
 
     def __del__(self):
@@ -207,7 +201,7 @@ if __name__ == "__main__":
             language_instruction="pick up the bottle from the counter and place it inside the bin.",
         )
 
-        robot = OpenArmRobot(calibrate=False, enable_camera=True, camera_index=args.camera_index)
+        robot = OpenArmRobot(enable_camera=True, camera_index=args.camera_index)
         with robot.activate():
             for i in tqdm(range(ACTIONS_TO_EXECUTE), desc="Executing actions"):
                 img = robot.get_current_img()
@@ -232,16 +226,27 @@ if __name__ == "__main__":
                     print("executing action", i, "time taken", time.time() - start_time)
                 print("Action chunk execution time taken", time.time() - start_time)
     else:
-        raise NotImplementedError
-        dataset = LeRobotDataset()
-        print("Running playback of actions, this is NOT inference")
 
-        robot = OpenArmRobot(calibrate=False, enable_camera=True, camera_index=args.camera_index)
+        dataset_path = "/home/thomason/src/Isaac-GR00T/demo_data/openarm.PickNPlace"
+
+        data_config = DATA_CONFIG_MAP["openarm"]
+
+        dataset = LeRobotSingleDataset(
+            dataset_path=dataset_path,
+            modality_configs=data_config.modality_config(),
+            embodiment_tag=EmbodimentTag.NEW_EMBODIMENT,
+            video_backend="torchvision_av",
+        )
+
+        print("Running playback of actions, this is NOT inference")
+        import matplotlib.pyplot as plt
+        view_img(dataset[0]["observation.images.ego_view"].data.numpy().transpose(1, 2, 0))
+        robot = OpenArmRobot(enable_camera=True, camera_index=args.camera_index)
         with robot.activate():
             actions = []
             for i in tqdm(range(ACTIONS_TO_EXECUTE), desc="Loading actions"):
                 action = dataset[i]["action"]
-                img = dataset[i]["observation.images.webcam"].data.numpy()
+                img = dataset[i]["observation.images.ego_view"].data.numpy()
                 # original shape (3, 480, 640) for image data
                 realtime_img = robot.get_current_img()
 

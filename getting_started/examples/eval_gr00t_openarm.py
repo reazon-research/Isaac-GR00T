@@ -43,14 +43,17 @@ from tqdm import tqdm
 class RobotError(Exception):
     pass
 
+REALSENSE_SERIALS = ["123456789012"]
+CAMERA_VIEWS = ["ego_view"]
+
 class OpenArmRobot:
     def __init__(self, enable_camera=True, camera_index=0, device="can0"):
         self.enable_camera = enable_camera
         self.camera_index = camera_index
         if not enable_camera:
-            self.cameras = {}
+            self.cameras = CameraArray(REALSENSE_SERIALS, CAMERA_VIEWS)
         else:
-            self.cameras = {"ego_view": CameraArray()}
+            self.cameras = None
 
         # Create the robot
         print(f"starting OpenArm on {device}")
@@ -71,11 +74,10 @@ class OpenArmRobot:
         else:
             raise RobotError("Failed to enable torque") 
 
-        print("robot present position:", self.motor_bus.read("Present_Position"))
-
-        self.camera = self.cameras["ego_view"] if self.enable_camera else None
-        if self.camera is not None:
-            self.camera.connect()
+        print("robot present position:", self.get_observation()["observation.state"].data.numpy())
+        if self.cameras is not None:
+            img = self.get_current_img()
+            view_img(img)
         print("================> OpenArm is fully connected =================")
         
 
@@ -88,18 +90,32 @@ class OpenArmRobot:
         self.move_to_initial_pose()
 
     def get_observation(self):
-        return self.robot.capture_observation() and self.camera.capture_observation()
+        obs = {}
+        if self.cameras is not None:
+            obs["observation.images.ego_view"] = self.cameras.wait_for_frames()["ego_view"]
+        else:
+            obs["observation.images.ego_view"] = np.zeros((1, 480, 640, 3), dtype=np.uint8)
+        obs["observation.state"] = self.robot.get_state()
+        return obs
 
     def get_current_state(self):
         return self.get_observation()["observation.state"].data.numpy()
 
     def get_current_img(self):
-        img = self.get_observation()["observation.images.ego_view"].data.numpy()
-        # convert bgr to rgb
+        img = self.get_observation()["observation.images.ego_view"]
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         return img
 
     def set_target_state(self, target_state: torch.Tensor):
+
+        """SAFETY FILTER: if position is too far from current position, do not set the target state"""
+        current_state = self.get_current_state()
+
+        MAX_ANGULAR_POSITION_CHANGE = np.pi / 4.0
+        if max(abs(current_state - target_state.numpy())) > MAX_ANGULAR_POSITION_CHANGE:
+            raise RobotError("Target state is too far from current state, not setting target state")
+        """END SAFETY FILTER"""
+
         self.robot.set_position(target_state)
 
     def disable(self):
@@ -131,7 +147,7 @@ class Gr00tRobotInferenceClient:
 
     def get_action(self, img, state):
         obs_dict = {
-            "video.webcam": img[np.newaxis, :, :, :],
+            "video.ego_view": img[np.newaxis, :, :, :],
             "state.single_arm": state[:5][np.newaxis, :].astype(np.float64),
             "state.gripper": state[5:6][np.newaxis, :].astype(np.float64),
             "annotation.human.action.task_description": [self.language_instruction],
@@ -143,7 +159,7 @@ class Gr00tRobotInferenceClient:
 
     def sample_action(self):
         obs_dict = {
-            "video.webcam": np.zeros((1, self.img_size[0], self.img_size[1], 3), dtype=np.uint8),
+            "video.ego_view": np.zeros((1, self.img_size[0], self.img_size[1], 3), dtype=np.uint8),
             "state.single_arm": np.zeros((1, 7)),
             "state.gripper": np.zeros((1, 1)),
             "annotation.human.action.task_description": [self.language_instruction],
@@ -184,7 +200,6 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8888)
     parser.add_argument("--action_horizon", type=int, default=12)
     parser.add_argument("--actions_to_execute", type=int, default=1500)
-    parser.add_argument("--camera_index", type=int, default=0)
     args = parser.parse_args()
 
     ACTIONS_TO_EXECUTE = args.actions_to_execute
@@ -201,7 +216,7 @@ if __name__ == "__main__":
             language_instruction="pick up the bottle from the counter and place it inside the bin.",
         )
 
-        robot = OpenArmRobot(enable_camera=True, camera_index=args.camera_index)
+        robot = OpenArmRobot(enable_camera=True)
         with robot.activate():
             for i in tqdm(range(ACTIONS_TO_EXECUTE), desc="Executing actions"):
                 img = robot.get_current_img()
@@ -240,13 +255,16 @@ if __name__ == "__main__":
 
         print("Running playback of actions, this is NOT inference")
         import matplotlib.pyplot as plt
-        view_img(dataset[0]["observation.images.ego_view"].data.numpy().transpose(1, 2, 0))
-        robot = OpenArmRobot(enable_camera=True, camera_index=args.camera_index)
+    
+        video_memview = dataset[0]["video.ego_view"].data
+        video_np = np.asarray(video_memview)  # Convert memoryview to np.ndarray
+
+        robot = OpenArmRobot(enable_camera=True)
         with robot.activate():
             actions = []
             for i in tqdm(range(ACTIONS_TO_EXECUTE), desc="Loading actions"):
                 action = dataset[i]["action"]
-                img = dataset[i]["observation.images.ego_view"].data.numpy()
+                img = video_np[i]
                 # original shape (3, 480, 640) for image data
                 realtime_img = robot.get_current_img()
 

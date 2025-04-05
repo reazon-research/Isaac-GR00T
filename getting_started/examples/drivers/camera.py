@@ -1,17 +1,10 @@
-import time
 import numpy as np
-import dataclasses
 import pyrealsense2 as rs
 import cv2
 
 FRAME_W = 640
 FRAME_H = 480
 FPS = 30
-
-@dataclasses.dataclass
-class Frame:
-    timestamp: float
-    buffer: object
 
 class CameraArray:
     def __init__(self, serials, names=None):
@@ -33,7 +26,7 @@ class CameraArray:
             self.pipelines[name] = pipe
 
 
-    def wait_for_frames(self):
+    def wait_for_frames(self) -> dict[str, np.ndarray]:
         ret = {}
         for name in self.names:
             pipeline = self.pipelines[name]
@@ -44,7 +37,7 @@ class CameraArray:
 
             # NOTE We use the system timestamp instead of frame.timestamp,
             # to accomodate delayed signals.
-            ret[name] = Frame(time.time(), buffer)
+            ret[name] = buffer
         return ret
 
 if __name__ == "__main__":
@@ -55,6 +48,7 @@ if __name__ == "__main__":
     while True:
         frames = camera_array.wait_for_frames()
         for name, frame in frames.items():
-            frame.buffer = cv2.cvtColor(frame.buffer, cv2.COLOR_RGB2BGR)
-            cv2.imshow(f"Camera {name}", frame.buffer)
+            frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            print(f"Camera {name}: {frame.shape}")
+            cv2.imshow(f"Camera {name}", frame)
             cv2.waitKey(1)

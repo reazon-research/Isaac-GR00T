@@ -2,7 +2,7 @@
 
 For deployment on [OpenArm](https://github.com/reazon-research/openarm)
 
-![openarm-1-5k-steps.png](./media/openarm-1-5k-steps.png)
+https://github.com/user-attachments/assets/ff1c8d33-7455-4cbe-ba84-98aa97ec9dc0
 
 
 ## Installation
@@ -18,7 +18,9 @@ pip install --no-build-isolation flash-attn==2.7.1.post4
 
 - Fine-tuning image inputs requires significant VRAM (more than 24GB): [reduce parallel processes in groot_finetune.py](https://github.com/NVIDIA/Isaac-GR00T/issues/24#issuecomment-2757807812)
 
+## Results
 
+![openarm-1-5k-steps.png](./media/openarm-1-5k-steps.png)
 
 ## License 
 
